@@ -1,0 +1,11 @@
+buildscript {
+    repositories {
+        mavenLocal()
+    }
+
+    dependencies {
+        classpath 'net.idlestate:gradle-download-dependencies-plugin:1.+'
+    }
+}
+
+apply plugin: 'download-dependencies'

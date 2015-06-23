@@ -1,0 +1,26 @@
+apply plugin: 'groovy'
+apply plugin: 'java-gradle-plugin'
+apply plugin: 'maven-publish'
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
+dependencies {
+    compile localGroovy()
+}
+
+group = 'net.idlestate'
+archivesBaseName = 'gradle-download-dependencies-plugin'
+// Please comply with the rules of Semantic Versioning (http://semver.org) and tag releases.
+version = '1.0.0'
+
+publishing {
+    publications {
+        mavenJava( MavenPublication ) {
+            artifactId archivesBaseName
+            from components.java
+        }
+    }
+}

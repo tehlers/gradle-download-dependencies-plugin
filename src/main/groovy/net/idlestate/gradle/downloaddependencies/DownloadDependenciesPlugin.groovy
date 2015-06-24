@@ -9,7 +9,7 @@ import org.gradle.api.Project
 class DownloadDependenciesPlugin implements Plugin<Project> {
 
     void apply( Project project ) {
-        project.logger.info( 'DownloadDependenciesPlugin.apply( project ) called' )
+        project.task( 'downloadDependencies', type: DownloadDependenciesTask, group: 'Build Setup', description: 'Downloads all dependencies into a local directory based repository.' )
     }
 }
 

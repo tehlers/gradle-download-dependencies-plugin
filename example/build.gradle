@@ -9,3 +9,13 @@ buildscript {
 }
 
 apply plugin: 'download-dependencies'
+apply plugin: 'java'
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
+dependencies {
+    testCompile 'org.testng:testng:6.9.4'
+}

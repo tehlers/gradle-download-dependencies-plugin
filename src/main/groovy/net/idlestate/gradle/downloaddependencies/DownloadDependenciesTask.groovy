@@ -2,6 +2,7 @@ package net.idlestate.gradle.downloaddependencies
 
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
+import org.gradle.api.artifacts.component.ModuleComponentIdentifier
 
 import org.gradle.jvm.JvmLibrary
 import org.gradle.language.base.artifact.SourcesArtifact
@@ -43,7 +44,7 @@ class DownloadDependenciesTask extends DefaultTask {
         [ (MavenModule.class): [ MavenPomArtifact.class ] as Class[],
           (JvmLibrary.class): [ SourcesArtifact.class, JavadocArtifact.class ] as Class[] ].each { module, artifactTypes ->
             def resolvedComponents = resolveComponents( componentIds, module, artifactTypes )
-            for ( component in resolvedComponents ) {
+            resolvedComponents.each { component ->
                 saveArtifacts( component, artifactTypes )
             }
         }
@@ -57,13 +58,17 @@ class DownloadDependenciesTask extends DefaultTask {
     }
 
     def saveArtifacts( artifactsResult, artifactTypes ) {
-        logger.info( "Saving artifacts of ${artifactsResult.id.toString()}" )
+        logger.debug( "Saving artifacts of ${artifactsResult.id.toString()}" )
 
         artifactTypes.each { artifactType ->
             artifactsResult.getArtifacts( artifactType ).each { artifact ->
 
                 if ( artifact.hasProperty( 'file' ) ) {
                     copyArtifactFileToRepository( artifactsResult.id, artifact.file )
+
+                    if ( artifactType == MavenPomArtifact.class ) {
+                        resolveParents( artifact.file )
+                    }
                 }
 
                 if ( artifact.hasProperty( 'failure' ) ) {
@@ -86,6 +91,55 @@ class DownloadDependenciesTask extends DefaultTask {
             source.withInputStream { is ->
                 os << is
             }
+        }
+    }
+
+    def resolveParents( pom ) {
+        XmlSlurper parser = new XmlSlurper()
+        parser.setFeature( 'http://apache.org/xml/features/nonvalidating/load-external-dtd', false )
+        parser.setFeature( "http://apache.org/xml/features/disallow-doctype-decl", false )
+
+        def document = parser.parse( pom )
+        if ( !document.parent.isEmpty() ) {
+            def componentId = new ParentComponentIdentifier( document.parent )
+
+            logger.info( "Resolving parent ${componentId.displayName}" )
+            def resolvedParentComponents = project.dependencies.createArtifactResolutionQuery()
+                                           .forComponents( componentId )
+                                           .withArtifacts( MavenModule, MavenPomArtifact )
+                                           .execute().resolvedComponents
+
+            resolvedParentComponents.each { component ->
+                saveArtifacts( component, MavenPomArtifact )
+            }
+        }
+    }
+
+    static final class ParentComponentIdentifier implements ModuleComponentIdentifier {
+        String _group
+        String _module
+        String _version
+
+        ParentComponentIdentifier( parent ) {
+            _group = parent.groupId
+            _module = parent.artifactId
+            _version = parent.version
+        }
+
+        String getGroup() {
+            return _group
+        }
+
+        String getModule() {
+            return _module
+        }
+
+        String getVersion() {
+            return _version
+        }
+
+        String getDisplayName() {
+            return "${_group}:${_module}:${_version}"
         }
     }
 }

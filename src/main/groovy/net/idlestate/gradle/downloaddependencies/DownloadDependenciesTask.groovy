@@ -14,11 +14,11 @@ import org.gradle.maven.MavenPomArtifact
  * Gradle-Task that downloads all dependencies into a local directory based repository.
  */
 class DownloadDependenciesTask extends DefaultTask {
-    File repository = getProject().file( [ 'gradle', 'repository' ].join( File.separator ) )
+    File localRepository
 
     @TaskAction
     def downloadDependencies() {
-        repository.mkdirs()
+        localRepository.mkdirs()
 
         def libraryFiles = [:]
         def componentIds = [] as Set
@@ -82,7 +82,7 @@ class DownloadDependenciesTask extends DefaultTask {
         logger.info( "Saving artifact file ${source.name} of ${id.toString()}" )
 
         def artifactPath = id.group.split( '\\.' ) + id.module + id.version
-        File destinationDirectory = new File( repository, artifactPath.join( File.separator ) )
+        File destinationDirectory = new File( localRepository, artifactPath.join( File.separator ) )
         destinationDirectory.mkdirs()
 
         File destination = new File( destinationDirectory, source.name )

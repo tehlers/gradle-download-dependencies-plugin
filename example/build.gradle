@@ -8,7 +8,7 @@ buildscript {
     }
 }
 
-apply plugin: 'download-dependencies'
+apply plugin: 'net.idlestate.download-dependencies'
 apply plugin: 'java'
 
 repositories {

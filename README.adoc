@@ -1,0 +1,66 @@
+# Gradle - DownloadDependencies
+
+The purpose of this plugin is to allow the use of the Gradle dependency resolution but with the dependencies saved as part of the project.
+
+To achieve this it adds the task `downloadDependencies` that downloads all dependencies - libraries, sources, javadocs and maven poms (including parents) - into a local repository that follows the maven structure.
+
+If the task graph doesn't include the task `downloadDependencies`, the plugin will replace the specified repositories with the local repository.
+
+The intended workflow is
+
+* to execute `downloadDependencies` whenever the dependencies have changed, 
+* to add the changes to the local repository to the version control system
+* and after that transparently use the local repository for dependency resolution.
+
+## Usage
+
+Usually all it takes to use the plugin is to add it to the buildscript dependencies and apply it.
+
+.build.gradle
+[source,groovy]
+--------------------------------------------------------------------
+buildscript {
+    repositories {
+        jcenter()
+    }
+
+    dependencies {
+        classpath 'net.idlestate:gradle-download-dependencies-plugin:1.+'
+    }
+}
+
+apply plugin: 'net.idlestate.download-dependencies'
+apply plugin: 'java'
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+    jCenter()
+}
+
+dependencies {
+    // dependencies of your project
+}
+
+// ...
+--------------------------------------------------------------------
+
+## Tasks
+
+The plugin adds the new task `downloadDependencies`. It downloads the dependencies into a local repository that follows the maven structure.
+
+## Extension properties
+
+The plugin can be configured by the extension `downloadDependencies`. It takes a file into `localRepository` to change the path of the local maven repository from the default `"${rootProject.projectDir}/gradle/repository"`.
+
+.build.gradle
+[source,groovy]
+--------------------------------------------------------------------
+// ...
+
+downloadDependencies {
+    localRepository = file( 'alternative/path/to/repository' )
+}
+
+// ...
+--------------------------------------------------------------------

@@ -1,5 +1,16 @@
+buildscript {
+    repositories {
+        jcenter()
+    }
+
+    dependencies {
+        classpath 'nl.javadude.gradle.plugins:license-gradle-plugin:0.11.0'
+    }
+}
+
 apply plugin: 'groovy'
 apply plugin: 'java-gradle-plugin'
+apply plugin: 'license'
 apply plugin: 'maven-publish'
 
 repositories {
@@ -21,6 +32,20 @@ publishing {
         mavenJava( MavenPublication ) {
             artifactId archivesBaseName
             from components.java
+
+            pom.withXml {
+                asNode().children().last() + {
+                    resolveStrategy = Closure.DELEGATE_FIRST
+                    description 'A Gradle plugin that downloads the dependencies of a Java project into a local repository that follows the maven structure'
+                    licenses {
+                        license {
+                            name 'The Apache Software License, Version 2.0'
+                            url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                            distribution 'repo'
+                        }
+                    }
+                }
+            }
         }
     }
 }

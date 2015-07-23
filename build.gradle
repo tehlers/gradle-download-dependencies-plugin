@@ -74,6 +74,8 @@ bintray {
         vcsUrl = 'https://github.com/tehlers/gradle-download-dependencies-plugin.git'
         version {
             name = project.version
+            desc = 'A Gradle plugin that downloads the dependencies of a Java project into a local repository that follows the maven structure'
+            released  = new Date()
         }
     }
 }

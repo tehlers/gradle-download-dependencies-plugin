@@ -4,10 +4,12 @@ buildscript {
     }
 
     dependencies {
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.2'
         classpath 'nl.javadude.gradle.plugins:license-gradle-plugin:0.11.0'
     }
 }
 
+apply plugin: 'com.jfrog.bintray'
 apply plugin: 'groovy'
 apply plugin: 'java-gradle-plugin'
 apply plugin: 'license'
@@ -27,13 +29,31 @@ archivesBaseName = 'gradle-download-dependencies-plugin'
 // Please comply with the rules of Semantic Versioning (http://semver.org) and tag releases.
 version = '1.0.0'
 
+bintray {
+    // Define in ~/.gradle/gradle.properties or as project property on startup
+    user = bintray_user
+    key = bintray_api_key
+
+    publications = [ 'gradlePlugin' ]
+
+    pkg {
+        repo = 'maven'
+        name = archivesBaseName
+        licenses = [ 'Apache-2.0' ]
+        vcsUrl = 'https://github.com/tehlers/gradle-download-dependencies-plugin.git'
+        version {
+            name = version
+        }
+    }
+}
+
 task sourceJar( type: Jar ) {
     from sourceSets.main.allGroovy
 }
 
 publishing {
     publications {
-        mavenJava( MavenPublication ) {
+        gradlePlugin( MavenPublication ) {
             artifactId archivesBaseName
             from components.java
 

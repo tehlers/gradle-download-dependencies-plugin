@@ -156,5 +156,9 @@ class DownloadDependenciesTask extends DefaultTask {
         String getDisplayName() {
             return "${_group}:${_module}:${_version}"
         }
+
+        String toString() {
+            return getDisplayName()
+        }
     }
 }

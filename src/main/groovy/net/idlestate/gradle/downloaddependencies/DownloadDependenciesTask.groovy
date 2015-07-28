@@ -40,7 +40,17 @@ class DownloadDependenciesTask extends DefaultTask {
         def libraryFiles = [:]
         def componentIds = [] as Set
         project.configurations.each { configuration ->
-            componentIds.addAll( configuration.incoming.resolutionResult.allDependencies.collect { it.selected.id } )
+            componentIds.addAll(
+                configuration.incoming.resolutionResult.allDependencies.collect {
+                    if ( it.hasProperty( 'selected' ) ) {
+                        return it.selected.id
+                    }
+
+                    if ( it.hasProperty( 'attempted' ) ) {
+                        logger.warn( "Unable to save artifacts of ${it.attempted.displayName}" )
+                    }
+                }
+            )
 
             configuration.incoming.files.each { file ->
                 libraryFiles[ file.name ] = file

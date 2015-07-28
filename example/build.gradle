@@ -1,6 +1,7 @@
 buildscript {
     repositories {
         mavenLocal()
+        jcenter()
     }
 
     dependencies {
@@ -13,9 +14,11 @@ apply plugin: 'java'
 
 repositories {
     mavenLocal()
-    mavenCentral()
+    jcenter()
 }
 
 dependencies {
     testCompile 'org.testng:testng:6.9.4'
+    testCompile 'commons-beanutils:commons-beanutils:1.8.3'
+    testCompile 'commons-codec:commons-codec:1.10'
 }

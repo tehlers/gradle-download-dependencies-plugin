@@ -15,6 +15,8 @@
  */
 package net.idlestate.gradle.downloaddependencies
 
+import com.google.common.io.Files
+
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.artifacts.component.ModuleComponentIdentifier
@@ -124,9 +126,54 @@ class DownloadDependenciesTask extends DefaultTask {
                                            .withArtifacts( MavenModule, MavenPomArtifact )
                                            .execute().resolvedComponents
 
-            resolvedParentComponents.each { component ->
-                saveArtifacts( component, MavenPomArtifact )
+            if ( resolvedParentComponents.isEmpty() ) {
+                // For unknown reasons parent poms are only resolvable from local repositories.
+                // If they are missing in local repositories, they are therefore downloaded by
+                // constructing urls with the definied repositories.
+                downloadParent( componentId )
+            } else {
+                resolvedParentComponents.each { component ->
+                    saveArtifacts( component, MavenPomArtifact )
+                }
             }
+        }
+    }
+
+    def downloadParent( id ) {
+        boolean found = project.repositories.find { repository ->
+            if ( repository.hasProperty( 'url' ) ) {
+                String fileName = "${id.module}-${id.version}.pom"
+                def artifactPath = id.group.split( '\\.' ) + id.module + id.version + fileName
+                URL url = new URL( "${repository.url}${artifactPath.join( '/' )}" )
+
+                File tempDir = Files.createTempDir()
+                tempDir.deleteOnExit()
+                File localPomFile = new File( tempDir, fileName )
+                localPomFile.deleteOnExit()
+
+                try {
+                    localPomFile.withOutputStream { os ->
+                        url.withInputStream { is ->
+                            os << is
+                        }
+                    }
+
+                    copyArtifactFileToRepository( id, localPomFile )
+                    resolveParents( localPomFile )
+
+                    logger.info( "Downloaded ${id.displayName} from ${url}" )
+
+                    return true
+                } catch ( FileNotFoundException e ) {
+                    logger.debug( "${id.displayName} not found at ${url}" )
+                }
+            }
+
+            return false
+        }
+
+        if ( !found ) {
+            logger.warn( "Unable to find pom file of ${id.displayName}" )
         }
     }
 

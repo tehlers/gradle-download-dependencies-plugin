@@ -39,7 +39,7 @@ class DownloadDependenciesTask extends DefaultTask {
 
         def libraryFiles = [:]
         def componentIds = [] as Set
-        project.configurations.each { configuration ->
+        ( project.configurations + project.buildscript.configurations ).each { configuration ->
             componentIds.addAll(
                 configuration.incoming.resolutionResult.allDependencies.collect {
                     if ( it.hasProperty( 'selected' ) ) {

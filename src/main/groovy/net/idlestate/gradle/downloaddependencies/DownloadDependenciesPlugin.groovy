@@ -18,16 +18,17 @@ package net.idlestate.gradle.downloaddependencies
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.util.GradleVersion
 
 /**
  * Gradle-Plugin that creates a local maven repository with all dependencies. 
  */
 class DownloadDependenciesPlugin implements Plugin<Project> {
-    static final String MINIMAL_GRADLE_VERSION = '2.3'
+    static final GradleVersion MINIMAL_GRADLE_VERSION = GradleVersion.version( '2.3' )
     static final String DOWNLOAD_DEPENDENCIES_TASK = 'downloadDependencies'
 
     void apply( Project project ) {
-        if ( project.gradle.gradleVersion < MINIMAL_GRADLE_VERSION ) {
+        if ( GradleVersion.current() < MINIMAL_GRADLE_VERSION ) {
             throw new GradleException( "${this.class.simpleName} only works with Gradle >= ${MINIMAL_GRADLE_VERSION}" )
         }
 

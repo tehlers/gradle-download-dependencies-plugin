@@ -51,6 +51,13 @@ class DownloadDependenciesPlugin implements Plugin<Project> {
                         url repository
                     }
                 }
+
+                project.buildscript.repositories.clear()
+                project.buildscript.repositories {
+                    maven {
+                        url repository
+                    }
+                }
             }
         }
 

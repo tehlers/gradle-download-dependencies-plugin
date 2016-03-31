@@ -60,11 +60,13 @@ class DownloadDependenciesTask extends DefaultTask {
         logger.info( "Dependencies of all configurations: ${componentIds.collect { it.toString() }.join( ', ' ) }" )
 
         componentIds.each { component ->
-            def fileName = "${component.module}-${component.version}.jar"
-            if ( libraryFiles.containsKey( fileName.toString() ) ) {
-                copyArtifactFileToRepository( component, libraryFiles[ fileName ] )
-            } else {
-                logger.warn( "Library file ${fileName} of dependency ${component.toString()} not found." )
+            if ( component instanceof ModuleComponentIdentifier ) {
+                def fileName = "${component.module}-${component.version}.jar"
+                if ( libraryFiles.containsKey( fileName.toString() ) ) {
+                    copyArtifactFileToRepository( component, libraryFiles[ fileName ] )
+                } else {
+                    logger.warn( "Library file ${fileName} of dependency ${component.toString()} not found." )
+                }
             }
         }
 

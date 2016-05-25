@@ -61,11 +61,9 @@ class DownloadDependenciesTask extends DefaultTask {
 
         componentIds.each { component ->
             if ( component instanceof ModuleComponentIdentifier ) {
-                def fileName = "${component.module}-${component.version}.jar"
-                if ( libraryFiles.containsKey( fileName.toString() ) ) {
-                    copyArtifactFileToRepository( component, libraryFiles[ fileName ] )
-                } else {
-                    logger.warn( "Library file ${fileName} of dependency ${component.toString()} not found." )
+                File library = findMatchingLibrary( libraryFiles, component )
+                if ( library != null ) {
+                    copyArtifactFileToRepository( component, library )
                 }
             }
         }
@@ -77,6 +75,31 @@ class DownloadDependenciesTask extends DefaultTask {
                 saveArtifacts( component, artifactTypes )
             }
         }
+    }
+
+    File findMatchingLibrary( libraryFiles, component ) {
+
+        // Check for exact match
+        String fullFileName = "${component.module}-${component.version}.jar"
+
+        if ( libraryFiles.containsKey( fullFileName ) ) {
+            return libraryFiles[ fullFileName ]
+        }
+
+        // Search for library with classifier
+        String fileNameWithoutExtension = "${component.module}-${component.version}"
+
+        String key = libraryFiles.keySet().find {
+            it.startsWith( fileNameWithoutExtension )
+        }
+
+        if ( key != null ) {
+            return libraryFiles[ key ]
+        }
+
+        logger.warn( "Library file ${fullFileName} of dependency ${component.toString()} not found even when considering potential classifiers." )
+
+        return null
     }
 
     def resolveComponents( componentIds, module, artifactTypes ) {

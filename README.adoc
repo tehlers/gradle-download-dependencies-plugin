@@ -47,7 +47,13 @@ dependencies {
 
 ## Tasks
 
-The plugin adds the new task `downloadDependencies`. It downloads the dependencies into a local repository that follows the maven structure.
+### downloadDependencies
+
+The task `downloadDependencies` downloads the dependencies into a local repository that follows the maven structure.
+
+### cleanupLocalRepository
+
+The task `cleanupLocalRepository` removes unused dependencies from the local repository.
 
 ## Extension properties
 

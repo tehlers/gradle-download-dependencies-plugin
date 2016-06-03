@@ -15,6 +15,8 @@
  */
 package net.idlestate.gradle.downloaddependencies
 
+import java.io.File
+
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -26,6 +28,7 @@ import org.gradle.util.GradleVersion
 class DownloadDependenciesPlugin implements Plugin<Project> {
     static final GradleVersion MINIMAL_GRADLE_VERSION = GradleVersion.version( '2.3' )
     static final String DOWNLOAD_DEPENDENCIES_TASK = 'downloadDependencies'
+    static final String CLEANUP_LOCAL_REPOSITORY_TASK = 'cleanupLocalRepository'
 
     void apply( Project project ) {
         if ( GradleVersion.current() < MINIMAL_GRADLE_VERSION ) {
@@ -34,8 +37,21 @@ class DownloadDependenciesPlugin implements Plugin<Project> {
 
         project.task( DOWNLOAD_DEPENDENCIES_TASK, type: DownloadDependenciesTask, group: 'Build Setup', description: 'Downloads all dependencies into a local directory based repository.' )
 
+        project.task( CLEANUP_LOCAL_REPOSITORY_TASK, type: DownloadDependenciesTask, group: 'Build Setup', description: 'Remove unused dependencies from local repository' ) << {
+            ext.actualRepository = getLocalRepository( project )
+
+            logger.info( "Moving cleaned up repository from ${localRepository.absolutePath} to ${actualRepository.absolutePath}." )
+            project.delete( actualRepository )
+            project.copy {
+                from localRepository
+                into actualRepository
+            }
+            project.delete( localRepository )
+        }
+
         project.afterEvaluate {
             project.tasks[ DOWNLOAD_DEPENDENCIES_TASK ].localRepository = getLocalRepository( project )
+            project.tasks[ CLEANUP_LOCAL_REPOSITORY_TASK ].localRepository = project.file( getTemporaryRepository( project ) )
         }
 
         // Use only local repository, if download is not intended
@@ -70,5 +86,12 @@ class DownloadDependenciesPlugin implements Plugin<Project> {
         return project.downloadDependencies.localRepository
                ? project.downloadDependencies.localRepository
                : project.file( [ project.rootProject.projectDir, 'gradle', 'repository' ].join( File.separator ) )
+    }
+
+    String getTemporaryRepository( project ) {
+        File temporaryRepository = File.createTempDir( "${CLEANUP_LOCAL_REPOSITORY_TASK}-", '' )
+        temporaryRepository.delete()
+
+        return temporaryRepository.absolutePath
     }
 }

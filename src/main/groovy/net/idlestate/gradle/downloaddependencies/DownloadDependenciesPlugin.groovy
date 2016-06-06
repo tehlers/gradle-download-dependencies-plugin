@@ -51,7 +51,7 @@ class DownloadDependenciesPlugin implements Plugin<Project> {
 
         project.afterEvaluate {
             project.tasks[ DOWNLOAD_DEPENDENCIES_TASK ].localRepository = getLocalRepository( project )
-            project.tasks[ CLEANUP_LOCAL_REPOSITORY_TASK ].localRepository = project.file( getTemporaryRepository( project ) )
+            project.tasks[ CLEANUP_LOCAL_REPOSITORY_TASK ].localRepository = project.file( DownloadDependenciesUtils.getTemporaryDirectory() )
         }
 
         // Use only local repository, if download is not intended
@@ -86,12 +86,5 @@ class DownloadDependenciesPlugin implements Plugin<Project> {
         return project.downloadDependencies.localRepository
                ? project.downloadDependencies.localRepository
                : project.file( [ project.rootProject.projectDir, 'gradle', 'repository' ].join( File.separator ) )
-    }
-
-    String getTemporaryRepository( project ) {
-        File temporaryRepository = File.createTempDir( "${CLEANUP_LOCAL_REPOSITORY_TASK}-", '' )
-        temporaryRepository.delete()
-
-        return temporaryRepository.absolutePath
     }
 }

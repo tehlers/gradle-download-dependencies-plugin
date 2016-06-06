@@ -15,8 +15,6 @@
  */
 package net.idlestate.gradle.downloaddependencies
 
-import com.google.common.io.Files
-
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.artifacts.component.ModuleComponentIdentifier
@@ -175,7 +173,7 @@ class DownloadDependenciesTask extends DefaultTask {
                 def artifactPath = id.group.split( '\\.' ) + id.module + id.version + fileName
                 URL url = new URL( "${repository.url}${artifactPath.join( '/' )}" )
 
-                File tempDir = Files.createTempDir()
+                File tempDir = project.mkdir( DownloadDependenciesUtils.getTemporaryDirectory() )
                 tempDir.deleteOnExit()
                 File localPomFile = new File( tempDir, fileName )
                 localPomFile.deleteOnExit()

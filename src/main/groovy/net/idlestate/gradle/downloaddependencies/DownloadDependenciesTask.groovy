@@ -171,7 +171,7 @@ class DownloadDependenciesTask extends DefaultTask {
             if ( repository.hasProperty( 'url' ) ) {
                 String fileName = "${id.module}-${id.version}.pom"
                 def artifactPath = id.group.split( '\\.' ) + id.module + id.version + fileName
-                URL url = new URL( "${repository.url}${artifactPath.join( '/' )}" )
+                URL url = new URL( "${repository.url}${repository.url.toString().endsWith( '/' ) ? '' : '/'}${artifactPath.join( '/' )}" )
 
                 File tempDir = project.mkdir( DownloadDependenciesUtils.getTemporaryDirectory() )
                 tempDir.deleteOnExit()

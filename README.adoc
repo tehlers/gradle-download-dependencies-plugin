@@ -2,7 +2,7 @@
 
 The purpose of this plugin is to allow the use of the Gradle dependency resolution but with the dependencies saved as part of the project.
 
-To achieve this it adds the task `downloadDependencies` that downloads all dependencies - libraries, sources, javadocs and maven poms (including parents) - into a local repository that follows the maven structure.
+To achieve this it adds the task `downloadDependencies` that downloads all dependencies - libraries, sources, javadocs and maven poms (including parents) - into a local repository that follows the maven structure for the root project and all subprojects.
 
 If the task graph doesn't include the task `downloadDependencies`, the plugin will replace the specified repositories with the local repository.
 

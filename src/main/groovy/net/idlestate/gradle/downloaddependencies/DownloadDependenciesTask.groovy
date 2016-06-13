@@ -16,6 +16,7 @@
 package net.idlestate.gradle.downloaddependencies
 
 import org.gradle.api.DefaultTask
+import org.gradle.api.Project
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.artifacts.component.ModuleComponentIdentifier
 
@@ -35,9 +36,16 @@ class DownloadDependenciesTask extends DefaultTask {
     def downloadDependencies() {
         localRepository.mkdirs()
 
+        downloadDependenciesForProject( project )
+        project.subprojects.each {
+            downloadDependenciesForProject( it )
+        }
+    }
+
+    void downloadDependenciesForProject( Project currentProject ) {
         def libraryFiles = [:]
         def componentIds = [] as Set
-        ( project.configurations + project.buildscript.configurations ).each { configuration ->
+        ( currentProject.configurations + currentProject.buildscript.configurations ).each { configuration ->
             componentIds.addAll(
                 configuration.incoming.resolutionResult.allDependencies.collect {
                     if ( it.hasProperty( 'selected' ) ) {

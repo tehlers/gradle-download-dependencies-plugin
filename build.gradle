@@ -27,7 +27,7 @@ dependencies {
 group = 'net.idlestate'
 archivesBaseName = 'gradle-download-dependencies-plugin'
 // Please comply with the rules of Semantic Versioning (http://semver.org) and tag releases.
-version = '1.2.1'
+version = '1.3.0'
 
 task sourceJar( type: Jar ) {
     from sourceSets.main.allGroovy

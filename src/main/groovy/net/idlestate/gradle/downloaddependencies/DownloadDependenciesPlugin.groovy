@@ -54,24 +54,26 @@ class DownloadDependenciesPlugin implements Plugin<Project> {
             project.tasks[ CLEANUP_LOCAL_REPOSITORY_TASK ].localRepository = project.file( DownloadDependenciesUtils.getTemporaryDirectory() )
         }
 
-        // Use only local repository, if download is not intended
-        project.gradle.taskGraph.whenReady { taskGraph ->
-            if ( !taskGraph.hasTask( ":${DOWNLOAD_DEPENDENCIES_TASK}" ) ) {
-                File repository = getLocalRepository( project )
+        project.allprojects {
+            // Use only local repository, if download is not intended
+            it.gradle.taskGraph.whenReady { taskGraph ->
+                if ( !taskGraph.hasTask( ":${DOWNLOAD_DEPENDENCIES_TASK}" ) ) {
+                    File repository = getLocalRepository( project )
 
-                project.logger.info( "Replacing all defined repositories with local repository at ${repository}" )
+                    it.logger.info( "Replacing all defined repositories with local repository at ${repository}" )
 
-                project.repositories.clear()
-                project.repositories {
-                    maven {
-                        url repository
+                    it.repositories.clear()
+                    it.repositories {
+                        maven {
+                            url repository
+                        }
                     }
-                }
 
-                project.buildscript.repositories.clear()
-                project.buildscript.repositories {
-                    maven {
-                        url repository
+                    it.buildscript.repositories.clear()
+                    it.buildscript.repositories {
+                        maven {
+                            url repository
+                        }
                     }
                 }
             }

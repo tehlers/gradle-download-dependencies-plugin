@@ -1,0 +1,10 @@
+apply plugin: 'java'
+
+repositories {
+    mavenLocal()
+    jcenter()
+}
+
+dependencies {
+    compile 'org.slf4j:jcl-over-slf4j:1.7.21'
+}

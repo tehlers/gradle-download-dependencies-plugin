@@ -201,6 +201,8 @@ class DownloadDependenciesTask extends DefaultTask {
                     return true
                 } catch ( FileNotFoundException e ) {
                     logger.debug( "${id.displayName} not found at ${url}" )
+                } finally {
+                    project.delete( tempDir )
                 }
             }
 

@@ -131,13 +131,17 @@ class DownloadDependenciesTask extends DefaultTask {
     }
 
     def copyArtifactFileToRepository( id, source ) {
-        logger.info( "Saving artifact file ${source.name} of ${id.toString()}" )
-
         def artifactPath = id.group.split( '\\.' ) + id.module + id.version
         File destinationDirectory = new File( localRepository, artifactPath.join( File.separator ) )
         destinationDirectory.mkdirs()
 
         File destination = new File( destinationDirectory, source.name )
+        if ( destination.exists() ) {
+            logger.debug( "${destination.absolutePath} already exists - skipping" )
+            return
+        }
+
+        logger.info( "Saving artifact file ${source.name} of ${id.toString()} to ${destination.absolutePath}" )
 
         destination.withOutputStream { os ->
             source.withInputStream { is ->

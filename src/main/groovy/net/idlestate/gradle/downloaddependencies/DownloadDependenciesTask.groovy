@@ -155,7 +155,9 @@ class DownloadDependenciesTask extends DefaultTask {
         parser.setFeature( 'http://apache.org/xml/features/nonvalidating/load-external-dtd', false )
         parser.setFeature( "http://apache.org/xml/features/disallow-doctype-decl", false )
 
-        def document = parser.parse( pom )
+        // @TODO: add support for https://www.w3.org/TR/xhtml1/dtds.html#a_dtd_Latin-1_characters instead
+        def xmlString = pom.getText().replaceAll("&oslash;","&#248;");
+        def document = parser.parseText( xmlString )
         if ( !document.parent.isEmpty() ) {
             def componentId = new ParentComponentIdentifier( document.parent )
 

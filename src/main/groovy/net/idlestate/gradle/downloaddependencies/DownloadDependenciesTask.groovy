@@ -26,6 +26,10 @@ import org.gradle.language.java.artifact.JavadocArtifact
 import org.gradle.maven.MavenModule
 import org.gradle.maven.MavenPomArtifact
 
+import org.unbescape.html.HtmlEscape
+
+import org.xml.sax.SAXParseException
+
 /**
  * Gradle-Task that downloads all dependencies into a local directory based repository.
  */
@@ -155,9 +159,16 @@ class DownloadDependenciesTask extends DefaultTask {
         parser.setFeature( 'http://apache.org/xml/features/nonvalidating/load-external-dtd', false )
         parser.setFeature( "http://apache.org/xml/features/disallow-doctype-decl", false )
 
-        // @TODO: add support for https://www.w3.org/TR/xhtml1/dtds.html#a_dtd_Latin-1_characters instead
-        def xmlString = pom.getText().replaceAll("&oslash;","&#248;");
-        def document = parser.parseText( xmlString )
+        def document
+
+        try {
+            document = parser.parse( pom )
+        } catch( final SAXParseException e ) {
+            // Some POM files like plexus-1.0.4.pom are using undeclared entities. These entities will be replaced by their unicode equivalent.
+            def xml = HtmlEscape.unescapeHtml( pom.text )
+            document = parser.parseText( xml )
+        }
+
         if ( !document.parent.isEmpty() ) {
             def componentId = new ParentComponentIdentifier( document.parent )
 

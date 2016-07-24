@@ -22,12 +22,13 @@ repositories {
 
 dependencies {
     compile localGroovy()
+    compile 'org.unbescape:unbescape:1.1.3.RELEASE'
 }
 
 group = 'net.idlestate'
 archivesBaseName = 'gradle-download-dependencies-plugin'
 // Please comply with the rules of Semantic Versioning (http://semver.org) and tag releases.
-version = '1.3.3'
+version = '1.4.0'
 
 task sourceJar( type: Jar ) {
     from sourceSets.main.allGroovy

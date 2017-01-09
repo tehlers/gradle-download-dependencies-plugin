@@ -15,8 +15,6 @@
  */
 package net.idlestate.gradle.downloaddependencies
 
-import java.io.File
-
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -37,16 +35,18 @@ class DownloadDependenciesPlugin implements Plugin<Project> {
 
         project.task( DOWNLOAD_DEPENDENCIES_TASK, type: DownloadDependenciesTask, group: 'Build Setup', description: 'Downloads all dependencies into a local directory based repository.' )
 
-        project.task( CLEANUP_LOCAL_REPOSITORY_TASK, type: DownloadDependenciesTask, group: 'Build Setup', description: 'Remove unused dependencies from local repository' ) << {
-            ext.actualRepository = getLocalRepository( project )
+        project.task( CLEANUP_LOCAL_REPOSITORY_TASK, type: DownloadDependenciesTask, group: 'Build Setup', description: 'Remove unused dependencies from local repository' ) {
+            doLast {
+                ext.actualRepository = getLocalRepository( project )
 
-            logger.info( "Moving cleaned up repository from ${localRepository.absolutePath} to ${actualRepository.absolutePath}." )
-            project.delete( actualRepository )
-            project.copy {
-                from localRepository
-                into actualRepository
+                logger.info( "Moving cleaned up repository from ${localRepository.absolutePath} to ${actualRepository.absolutePath}." )
+                project.delete( actualRepository )
+                project.copy {
+                    from localRepository
+                    into actualRepository
+                }
+                project.delete( localRepository )
             }
-            project.delete( localRepository )
         }
 
         project.afterEvaluate {

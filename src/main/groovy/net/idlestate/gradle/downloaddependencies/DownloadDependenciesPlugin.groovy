@@ -55,26 +55,35 @@ class DownloadDependenciesPlugin implements Plugin<Project> {
         }
 
         project.allprojects {
-            // Use only local repository, if download is not intended
+            // Create backup of defined repositories
+            final def definedRepositories = it.repositories.collect()
+
+            File repository = getLocalRepository( project )
+
+            it.logger.info( "Replacing all defined repositories in ${it.name} with local repository at ${repository}" )
+
+            it.repositories.clear()
+            it.repositories {
+                maven {
+                    url repository
+                }
+            }
+
+            /*
+            it.buildscript.repositories.clear()
+            it.buildscript.repositories {
+                maven {
+                    url repository
+                }
+            }
+            */
+
+            // Use defined repositories, if download is intended
             it.gradle.taskGraph.whenReady { taskGraph ->
-                if ( !taskGraph.hasTask( ":${DOWNLOAD_DEPENDENCIES_TASK}" ) ) {
-                    File repository = getLocalRepository( project )
+                if ( taskGraph.hasTask( ":${DOWNLOAD_DEPENDENCIES_TASK}" ) ) {
+                    it.logger.info( "Replacing local repository in ${it.name} with defined repositories" )
 
-                    it.logger.info( "Replacing all defined repositories with local repository at ${repository}" )
-
-                    it.repositories.clear()
-                    it.repositories {
-                        maven {
-                            url repository
-                        }
-                    }
-
-                    it.buildscript.repositories.clear()
-                    it.buildscript.repositories {
-                        maven {
-                            url repository
-                        }
-                    }
+                    it.repositories.addAll( definedRepositories )
                 }
             }
         }

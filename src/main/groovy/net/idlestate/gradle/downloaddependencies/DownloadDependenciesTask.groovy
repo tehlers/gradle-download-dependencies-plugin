@@ -50,20 +50,22 @@ class DownloadDependenciesTask extends DefaultTask {
         def libraryFiles = [:]
         def componentIds = [] as Set
         ( currentProject.configurations + currentProject.buildscript.configurations ).each { configuration ->
-            componentIds.addAll(
-                configuration.incoming.resolutionResult.allDependencies.collect {
-                    if ( it.hasProperty( 'selected' ) ) {
-                        return it.selected.id
-                    }
+            if ( isConfigurationResolvable( configuration ) ) {
+                componentIds.addAll(
+                    configuration.incoming.resolutionResult.allDependencies.collect {
+                        if ( it.hasProperty( 'selected' ) ) {
+                            return it.selected.id
+                        }
 
-                    if ( it.hasProperty( 'attempted' ) ) {
-                        logger.warn( "Unable to save artifacts of ${it.attempted.displayName}" )
+                        if ( it.hasProperty( 'attempted' ) ) {
+                            logger.warn( "Unable to save artifacts of ${it.attempted.displayName}" )
+                        }
                     }
+                )
+
+                configuration.incoming.files.each { file ->
+                    libraryFiles[ file.name ] = file
                 }
-            )
-
-            configuration.incoming.files.each { file ->
-                libraryFiles[ file.name ] = file
             }
         }
 
@@ -86,6 +88,20 @@ class DownloadDependenciesTask extends DefaultTask {
                 saveArtifacts( component, artifactTypes )
             }
         }
+    }
+
+    /**
+     * Gradle 3.4 introduced the configuration 'apiElements' that isn't resolvable. So
+     * we have to check before accessing it.
+     */
+    boolean isConfigurationResolvable( configuration ) {
+        if ( !configuration.metaClass.respondsTo( configuration, 'isCanBeResolved' ) ) {
+            // If the recently introduced method 'isCanBeResolved' is unavailable, we
+            // assume (for now) that the configuration can be resolved.
+            return true
+        }
+
+        return configuration.isCanBeResolved()
     }
 
     def findMatchingLibraries( libraryFiles, component ) {

@@ -17,6 +17,9 @@ package net.idlestate.gradle.downloaddependencies
 
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
+import org.gradle.api.artifacts.ModuleIdentifier
+import org.gradle.api.internal.artifacts.DefaultModuleIdentifier
+import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.artifacts.component.ModuleComponentIdentifier
 
@@ -34,6 +37,7 @@ import org.xml.sax.SAXParseException
  * Gradle-Task that downloads all dependencies into a local directory based repository.
  */
 class DownloadDependenciesTask extends DefaultTask {
+    @OutputDirectory
     File localRepository
 
     @TaskAction
@@ -258,16 +262,24 @@ class DownloadDependenciesTask extends DefaultTask {
             _version = parent.version
         }
 
+        @Override
         String getGroup() {
             return _group
         }
 
+        @Override
         String getModule() {
             return _module
         }
 
+        @Override
         String getVersion() {
             return _version
+        }
+
+        @Override
+        ModuleIdentifier getModuleIdentifier() {
+            return new DefaultModuleIdentifier( _group, _module )
         }
 
         String getDisplayName() {

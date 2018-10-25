@@ -66,7 +66,6 @@ class DownloadDependenciesTask extends DefaultTask {
                         }
                     }
                 )
-
                 configuration.incoming.files.each { file ->
                     libraryFiles[ file.name ] = file
                 }
@@ -99,10 +98,17 @@ class DownloadDependenciesTask extends DefaultTask {
      * we have to check before accessing it.
      */
     boolean isConfigurationResolvable( configuration ) {
-        if ( !configuration.metaClass.respondsTo( configuration, 'isCanBeResolved' ) ) {
-            // If the recently introduced method 'isCanBeResolved' is unavailable, we
-            // assume (for now) that the configuration can be resolved.
+        // The recently introduced method 'isCanBeResolved' may be unavailable
+        def hasCanBeResolved = configuration.metaClass.respondsTo( configuration, 'isCanBeResolved' )
+        // Assume (for now) that configurations without 'isCanBeResolved' can be resolved.
+        if ( !hasCanBeResolved ) {
             return true
+        }
+
+        // DependenciesMetadata-Configrations may not be resolved directly but do not implement 'isCanBeResolved' correctly
+        def isDependenciesMetadataConfig = configuration.name.endsWith("DependenciesMetadata")
+        if ( isDependenciesMetadataConfig ) {
+            return false
         }
 
         return configuration.isCanBeResolved()

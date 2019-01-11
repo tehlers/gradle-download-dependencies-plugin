@@ -1,1 +1,3 @@
 rootProject.name = 'gradle-download-dependencies-plugin'
+
+enableFeaturePreview('STABLE_PUBLISHING')
